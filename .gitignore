@@ -1,0 +1,11 @@
+# Environment variables
+.env
+
+# GCP credentials
+gcp-sa.json
+
+# macOS system files
+.DS_Store
+
+# Claude Code local settings
+.claude/
