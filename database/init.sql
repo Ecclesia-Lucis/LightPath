@@ -2,7 +2,9 @@
 -- This script sets up the basic database structure for development
 
 -- Enable pgvector extension for semantic memory (vector database)
-CREATE EXTENSION IF NOT EXISTS vector;
+-- Note: Requires postgres image with pgvector (e.g., ankane/pgvector)
+-- For now, we'll add this later when needed
+-- CREATE EXTENSION IF NOT EXISTS vector;
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
