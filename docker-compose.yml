@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: lightpath-postgres
+    environment:
+      POSTGRES_DB: lightpath
+      POSTGRES_USER: lightpath
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lightpath"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - lightpath-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: lightpath-redis
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - lightpath-network
+
+  # PgAdmin (optional - for database management)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: lightpath-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@lightpath.local
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - lightpath-network
+    profiles:
+      - tools
+
+  # Redis Commander (optional - for Redis management)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: lightpath-redis-commander
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+    networks:
+      - lightpath-network
+    profiles:
+      - tools
+
+volumes:
+  postgres-data:
+  redis-data:
+
+networks:
+  lightpath-network:
+    driver: bridge
